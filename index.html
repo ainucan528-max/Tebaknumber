@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Tebak Angka</title>
+  <style>
+
+    /* ======= RESET & BODY ======= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1e3a5f, #0f172a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      padding: 20px;
+    }
+
+    /* ======= KARTU UTAMA ======= */
+    .kartu {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 30px 24px;
+      width: 100%;
+      max-width: 420px;
+      color: white;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+
+    /* ======= JUDUL ======= */
+    .judul {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subjudul {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+    }
+
+    /* ======= PANEL INFO ======= */
+    .panel-info {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .kotak-info {
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px 8px;
+    }
+
+    .kotak-info .label {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .kotak-info .nilai {
+      font-size: 22px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    /* ======= AREA TEBAK ======= */
+    .area-tebak {
+      background: rgba(255,255,255,0.06);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .teks-rentang {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 14px;
+    }
+
+    .teks-rentang span {
+      color: #60a5fa;
+      font-weight: 700;
+    }
+
+    /* ======= INPUT ======= */
+    .baris-input {
+      display: flex;
+      gap: 10px;
+    }
+
+    #inputAngka {
+      flex: 1;
+      padding: 14px 16px;
+      font-size: 20px;
+      font-weight: 700;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      text-align: center;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    #inputAngka:focus {
+      border-color: #60a5fa;
+    }
+
+    #inputAngka::placeholder {
+      color: #475569;
+      font-size: 14px;
+    }
+
+    #inputAngka:disabled {
+      opacity: 0.4;
+    }
+
+    /* ======= TOMBOL TEBAK ======= */
+    #btnTebak {
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border: none;
+      border-radius: 14px;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    #btnTebak:active {
+      transform: scale(0.96);
+    }
+
+    #btnTebak:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* ======= PESAN HASIL ======= */
+    .pesan {
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
+      transition: all 0.3s;
+    }
+
+    .pesan.default {
+      background: rgba(255,255,255,0.05);
+      color: #94a3b8;
+    }
+
+    .pesan.terlalu-kecil {
+      background: rgba(239,68,68,0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+
+    .pesan.terlalu-besar {
+      background: rgba(234,179,8,0.15);
+      color: #fde68a;
+      border: 1px solid rgba(234,179,8,0.3);
+    }
+
+    .pesan.menang {
+      background: rgba(34,197,94,0.15);
+      color: #86efac;
+      border: 1px solid rgba(34,197,94,0.3);
+      font-size: 18px;
+    }
+
+    .pesan.kalah {
+      background: rgba(239,68,68,0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+
+    /* ======= RIWAYAT TEBAKAN ======= */
+    .judul-riwayat {
+      font-size: 12px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .daftar-riwayat {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      justify-content: center;
+      min-height: 36px;
+      margin-bottom: 20px;
+    }
+
+    .chip {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .chip.kecil {
+      background: rgba(239,68,68,0.2);
+      color: #fca5a5;
+    }
+
+    .chip.besar {
+      background: rgba(234,179,8,0.2);
+      color: #fde68a;
+    }
+
+    .chip.pas {
+      background: rgba(34,197,94,0.25);
+      color: #86efac;
+    }
+
+    /* ======= TOMBOL PILIH LEVEL ======= */
+    .judul-level {
+      font-size: 12px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .baris-level {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .btn-level {
+      flex: 1;
+      padding: 10px 6px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-level.aktif {
+      border-color: #60a5fa;
+      background: rgba(96,165,250,0.15);
+      color: #60a5fa;
+    }
+
+    .btn-level:active {
+      transform: scale(0.95);
+    }
+
+    /* ======= TOMBOL MAIN LAGI ======= */
+    #btnUlang {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #059669, #0891b2);
+      border: none;
+      border-radius: 14px;
+      color: white;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s;
+      display: none;
+    }
+
+    #btnUlang:active {
+      transform: scale(0.97);
+    }
+
+    /* ======= SKOR TERBAIK ======= */
+    .skor-terbaik {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .skor-terbaik span {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+
+    /* ======= ANIMASI GOYANG ======= */
+    @keyframes goyang {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-6px); }
+      40%       { transform: translateX(6px); }
+      60%       { transform: translateX(-4px); }
+      80%       { transform: translateX(4px); }
+    }
+
+    .goyang {
+      animation: goyang 0.4s ease;
+    }
+
+    /* ======= ANIMASI BOUNCE ======= */
+    @keyframes bounceIn {
+      0%   { transform: scale(0.8); opacity: 0; }
+      60%  { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .bounce {
+      animation: bounceIn 0.4s ease;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="kartu">
+
+  <!-- JUDUL -->
+  <div class="judul">🎯 Tebak Angka</div>
+  <div class="subjudul">Tebak angka yang tersembunyi!</div>
+
+  <!-- PANEL INFO -->
+  <div class="panel-info">
+    <div class="kotak-info">
+      <div class="label">Kesempatan</div>
+      <div class="nilai" id="sisaCoba">10</div>
+    </div>
+    <div class="kotak-info">
+      <div class="label">Tebakan ke</div>
+      <div class="nilai" id="jumlahTebak">0</div>
+    </div>
+    <div class="kotak-info">
+      <div class="label">Skor</div>
+      <div class="nilai" id="skor">0</div>
+    </div>
+  </div>
+
+  <!-- PILIH LEVEL -->
+  <div class="judul-level">Pilih Level</div>
+  <div class="baris-level">
+    <button class="btn-level aktif" onclick="pilihLevel(1,50,10,'Mudah')">
+      😊<br>Mudah<br><small>1–50</small>
+    </button>
+    <button class="btn-level" onclick="pilihLevel(2,100,7,'Normal')">
+      😐<br>Normal<br><small>1–100</small>
+    </button>
+    <button class="btn-level" onclick="pilihLevel(3,200,5,'Sulit')">
+      😤<br>Sulit<br><small>1–200</small>
+    </button>
+  </div>
+
+  <!-- AREA TEBAK -->
+  <div class="area-tebak">
+    <div class="teks-rentang">
+      Tebak angka antara <span id="angkaMin">1</span>
+      sampai <span id="angkaMax">50</span>
+    </div>
+    <div class="baris-input">
+      <input
+        type="number"
+        id="inputAngka"
+        placeholder="Ketik angka..."
+        min="1"
+        max="50"
+      />
+      <button id="btnTebak" onclick="cekTebakan()">Tebak</button>
+    </div>
+  </div>
+
+  <!-- PESAN HASIL -->
+  <div class="pesan default" id="pesan">
+    👆 Masukkan angka tebakanmu!
+  </div>
+
+  <!-- RIWAYAT TEBAKAN -->
+  <div class="judul-riwayat">Riwayat Tebakan</div>
+  <div class="daftar-riwayat" id="riwayat"></div>
+
+  <!-- TOMBOL MAIN LAGI -->
+  <button id="btnUlang" onclick="mainLagi()">🔄 Main Lagi</button>
+
+  <!-- SKOR TERBAIK -->
+  <div class="skor-terbaik">
+    🏆 Skor Terbaik: <span id="skorTerbaik">0</span>
+  </div>
+
+</div>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+
+  // ======= VARIABEL GLOBAL =======
+  let angkaRahasia  = 0;
+  let sisaCoba      = 10;
+  let jumlahTebak   = 0;
+  let skor          = 0;
+  let skorTerbaik   = 0;
+  let sedangMain    = false;
+
+  // Setting level saat ini
+  let levelSaatIni  = 1;
+  let maxAngka      = 50;
+  let minAngka      = 1;
+  let maxCoba       = 10;
+  let namaLevel     = 'Mudah';
+
+  // ======= MULAI GAME =======
+  function mulaiGame() {
+    angkaRahasia = Math.floor(Math.random() * maxAngka) + minAngka;
+    sisaCoba     = maxCoba;
+    jumlahTebak  = 0;
+    skor         = 0;
+    sedangMain   = true;
+
+    // Update tampilan
+    document.getElementById('sisaCoba').textContent   = sisaCoba;
+    document.getElementById('jumlahTebak').textContent = jumlahTebak;
+    document.getElementById('skor').textContent        = skor;
+    document.getElementById('riwayat').innerHTML       = '';
+    document.getElementById('inputAngka').value        = '';
+    document.getElementById('inputAngka').disabled     = false;
+    document.getElementById('btnTebak').disabled       = false;
+    document.getElementById('btnUlang').style.display  = 'none';
+
+    // Pesan awal
+    setPesan('default', '👆 Masukkan angka tebakanmu!');
+
+    // Fokus input (kalau bisa)
+    document.getElementById('inputAngka').focus();
+  }
+
+  // ======= PILIH LEVEL =======
+  function pilihLevel(lv, maks, coba, nama) {
+    levelSaatIni = lv;
+    maxAngka     = maks;
+    minAngka     = 1;
+    maxCoba      = coba;
+    namaLevel    = nama;
+
+    // Update rentang tampilan
+    document.getElementById('angkaMin').textContent = minAngka;
+    document.getElementById('angkaMax').textContent = maxAngka;
+    document.getElementById('inputAngka').max       = maxAngka;
+
+    // Tandai tombol aktif
+    let semua = document.querySelectorAll('.btn-level');
+    semua.forEach((b, i) => {
+      b.classList.toggle('aktif', i === lv - 1);
+    });
+
+    // Mulai ulang game dengan level baru
+    mulaiGame();
+  }
+
+  // ======= CEK TEBAKAN =======
+  function cekTebakan() {
+    if (!sedangMain) return;
+
+    let input    = document.getElementById('inputAngka');
+    let tebakan  = parseInt(input.value);
+
+    // Validasi
+    if (isNaN(tebakan) || tebakan < minAngka || tebakan > maxAngka) {
+      goyang(document.getElementById('inputAngka'));
+      setPesan('terlalu-kecil',
+        '⚠️ Masukkan angka antara ' + minAngka + ' sampai ' + maxAngka + '!');
+      return;
+    }
+
+    jumlahTebak++;
+    sisaCoba--;
+
+    document.getElementById('jumlahTebak').textContent = jumlahTebak;
+    document.getElementById('sisaCoba').textContent    = sisaCoba;
+
+    // Tambah ke riwayat
+    tambahRiwayat(tebakan);
+
+    input.value = '';
+
+    // Cek hasil
+    if (tebakan === angkaRahasia) {
+      // MENANG
+      let poin = hitungSkor();
+      skor += poin;
+      if (skor > skorTerbaik) skorTerbaik = skor;
+
+      document.getElementById('skor').textContent        = skor;
+      document.getElementById('skorTerbaik').textContent = skorTerbaik;
+
+      setPesan('menang',
+        '🎉 Hore! Kamu berhasil! Angkanya adalah ' + angkaRahasia +
+        '. Dapat ' + poin + ' poin!');
+
+      selesaiGame();
+
+    } else if (sisaCoba <= 0) {
+      // KALAH
+      setPesan('kalah',
+        '😢 Kesempatanmu habis! Angka rahasianya adalah ' +
+        angkaRahasia + '. Coba lagi!');
+
+      selesaiGame();
+
+    } else {
+      // LANJUT
+      if (tebakan < angkaRahasia) {
+        setPesan('terlalu-kecil',
+          '⬆️ Terlalu kecil! Coba yang lebih besar. Sisa: ' +
+          sisaCoba + ' kesempatan.');
+      } else {
+        setPesan('terlalu-besar',
+          '⬇️ Terlalu besar! Coba yang lebih kecil. Sisa: ' +
+          sisaCoba + ' kesempatan.');
+      }
+    }
+  }
+
+  // ======= HITUNG SKOR =======
+  function hitungSkor() {
+    // Semakin sedikit tebakan dan level lebih tinggi = skor lebih besar
+    let dasarPoin = 100;
+    let bonusLevel = levelSaatIni * 50;
+    let bonusCepat = sisaCoba * 10;
+    return dasarPoin + bonusLevel + bonusCepat;
+  }
+
+  // ======= TAMBAH RIWAYAT =======
+  function tambahRiwayat(angka) {
+    let riwayat = document.getElementById('riwayat');
+    let chip    = document.createElement('div');
+    chip.textContent = angka;
+    chip.classList.add('chip');
+
+    if (angka < angkaRahasia)       chip.classList.add('kecil');
+    else if (angka > angkaRahasia)  chip.classList.add('besar');
+    else                            chip.classList.add('pas');
+
+    riwayat.appendChild(chip);
+  }
+
+  // ======= SET PESAN =======
+  function setPesan(kelas, teks) {
+    let el = document.getElementById('pesan');
+    el.className  = 'pesan ' + kelas;
+    el.textContent = teks;
+    el.classList.add('bounce');
+    setTimeout(() => el.classList.remove('bounce'), 400);
+  }
+
+  // ======= SELESAI GAME =======
+  function selesaiGame() {
+    sedangMain = false;
+    document.getElementById('inputAngka').disabled    = true;
+    document.getElementById('btnTebak').disabled      = true;
+    document.getElementById('btnUlang').style.display = 'block';
+  }
+
+  // ======= MAIN LAGI =======
+  function mainLagi() {
+    mulaiGame();
+  }
+
+  // ======= ANIMASI GOYANG =======
+  function goyang(el) {
+    el.classList.remove('goyang');
+    void el.offsetWidth; // reset animasi
+    el.classList.add('goyang');
+    setTimeout(() => el.classList.remove('goyang'), 500);
+  }
+
+  // ======= INPUT ENTER =======
+  document.getElementById('inputAngka')
+    .addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') cekTebakan();
+    });
+
+  // ======= MULAI SAAT HALAMAN DIBUKA =======
+  mulaiGame();
+
+</script>
+
+</body>
+</html>
